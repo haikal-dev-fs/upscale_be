@@ -16,6 +16,9 @@ class AuthTest extends TestCase
             'password' => 'password123'
         ];
         $this->post('/auth/register', $payload);
+        if ($this->response->getStatusCode() !== 201) {
+            fwrite(STDERR, $this->response->getContent());
+        }
         $this->seeStatusCode(201);
         $this->seeJsonStructure(['token']);
     }
@@ -29,6 +32,9 @@ class AuthTest extends TestCase
         ];
         $this->post('/auth/register', $payload);
         $this->post('/auth/register', $payload);
+        if ($this->response->getStatusCode() !== 500) {
+            fwrite(STDERR, $this->response->getContent());
+        }
         $this->seeStatusCode(500);
         $this->seeJsonContains(['error' => 'Registration failed']);
     }
@@ -46,6 +52,9 @@ class AuthTest extends TestCase
             'password' => 'password123'
         ];
         $this->post('/auth/login', $login);
+        if ($this->response->getStatusCode() !== 200) {
+            fwrite(STDERR, $this->response->getContent());
+        }
         $this->seeStatusCode(200);
         $this->seeJsonStructure(['token']);
     }
@@ -57,6 +66,9 @@ class AuthTest extends TestCase
             'password' => 'wrongpass'
         ];
         $this->post('/auth/login', $login);
+        if ($this->response->getStatusCode() !== 401) {
+            fwrite(STDERR, $this->response->getContent());
+        }
         $this->seeStatusCode(401);
         $this->seeJsonContains(['error' => 'invalid_credentials']);
     }
