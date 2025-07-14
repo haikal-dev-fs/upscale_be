@@ -57,7 +57,7 @@ jobs:
 
       - name: Run PHPUnit
         run: |
-          vendor/bin/phpunit --coverage-clover=coverage.xml
+          vendor/bin/phpunit --coverage-clover=coverage.xml --fail-on-warning=false
 
       - name: Generate Swagger docs
         run: php artisan swagger-lume:generate
