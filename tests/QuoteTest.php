@@ -26,6 +26,6 @@ class QuoteTest extends TestCase
     {
         $this->get('/quote', ['Authorization' => 'Bearer ' . $this->token]);
         $this->seeStatusCode(200);
-        $this->seeJsonStructure(['_id', 'content', 'author', 'tags']);
+        $this->seeJsonStructure([[ 'quote', 'author', 'category' ]]);
     }
 } 
