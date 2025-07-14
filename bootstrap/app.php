@@ -25,6 +25,10 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
+if (env('APP_ENV') === 'production') {
+    app('url')->forceScheme('https');
+}
+
 $app->withEloquent();
 
 /*
