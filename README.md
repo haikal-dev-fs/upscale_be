@@ -58,7 +58,7 @@ php artisan migrate --seed
 php -S 0.0.0.0:3200 -t public
 ```
 
-Visit **http://localhost:3200/api/documentation** for Swagger UI.
+Visit **https://upscalebe-production.up.railway.app/api/documentation** for Swagger UI.
 
 ---
 ## 🧪 Tests
