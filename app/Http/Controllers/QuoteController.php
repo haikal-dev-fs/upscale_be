@@ -32,7 +32,7 @@ class QuoteController extends Controller
     public function daily()
     {
         try {
-            $res = Http::get('https://api.quotable.io/random?tags=inspirational');
+            $res = Http::withOptions(['verify' => false])->get('https://api.quotable.io/random?tags=inspirational');
             return $res->json();
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch quote'], 500);

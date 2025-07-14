@@ -32,11 +32,11 @@ class AuthTest extends TestCase
         ];
         $this->post('/auth/register', $payload);
         $this->post('/auth/register', $payload);
-        if ($this->response->getStatusCode() !== 500) {
+        if ($this->response->getStatusCode() !== 422) {
             fwrite(STDERR, $this->response->getContent());
         }
-        $this->seeStatusCode(500);
-        $this->seeJsonContains(['error' => 'Registration failed']);
+        $this->seeStatusCode(422);
+        $this->seeJsonContains(['error' => 'The email has already been taken.']);
     }
 
     public function test_login_success()
