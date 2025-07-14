@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: lumen_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - "3306:3306"
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo_mysql, tokenizer, dom, fileinfo
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy env & generate key
+        run: |
+          cp .env.example .env
+          php -r "file_put_contents('.env', str_replace('APP_KEY=', 'APP_KEY='.`php -r "echo substr(bin2hex(random_bytes(16)),0,32);"`, file_get_contents('.env')));"
+          php artisan migrate --force
+
+      - name: Run PHPUnit
+        run: |
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Generate Swagger docs
+        run: php artisan swagger-lume:generate
+
+      - name: Upload Swagger artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-docs
+          path: storage/api-docs    # json & yaml output
+
