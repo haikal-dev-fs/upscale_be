@@ -35,9 +35,7 @@ class QuoteController extends Controller
             $apiKey = env('API_NINJAS_KEY');
             $res = Http::withHeaders([
                 'X-Api-Key' => $apiKey
-            ])->get('https://api.api-ninjas.com/v1/quotes', [
-                'category' => 'inspirational'
-            ]);
+            ])->get('https://api.api-ninjas.com/v1/quotes');
             return $res->json();
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch quote'], 500);
