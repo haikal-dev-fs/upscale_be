@@ -6,65 +6,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-build:
+  test:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_DATABASE: lumen_test
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - "3306:3306"
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
-          extensions: mbstring, pdo_mysql, tokenizer, dom, fileinfo
-          tools: composer:v2
-
+          php-version: '8.2'
+          extensions: mbstring, sqlite3, pdo, pdo_sqlite
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      - name: Copy env & migrate
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Set JWT_SECRET env
+        run: echo "JWT_SECRET=testingsecretkey1234567890" >> .env
+      - name: Set up SQLite database
         run: |
-          cp .env.example .env
-          # generate random APP_KEY
-          php -r '
-            $env = file_get_contents(".env");
-            $env = preg_replace("/^APP_KEY=.*/m",
-              "APP_KEY=" . substr(bin2hex(random_bytes(16)),0,32),
-              $env);
-            # override DB credentials for CI
-            $env = preg_replace("/^DB_HOST=.*/m",     "DB_HOST=127.0.0.1", $env);
-            $env = preg_replace("/^DB_PORT=.*/m",     "DB_PORT=3306",      $env);
-            $env = preg_replace("/^DB_DATABASE=.*/m", "DB_DATABASE=lumen_test", $env);
-            $env = preg_replace("/^DB_USERNAME=.*/m", "DB_USERNAME=root",  $env);
-            $env = preg_replace("/^DB_PASSWORD=.*/m", "DB_PASSWORD=root",  $env);
-            file_put_contents(".env", $env);
-          '
-          php artisan migrate --force
-
-      - name: Run PHPUnit
-        run: |
-          vendor/bin/phpunit --coverage-clover=coverage.xml
-
+          touch database/database.sqlite
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=database\/database.sqlite/' .env
+      - name: Generate JWT secret
+        run: php artisan jwt:secret --force
+      - name: Run migrations
+        run: php artisan migrate --force
+      - name: Run tests
+        run: vendor/bin/phpunit
       - name: Generate Swagger docs
         run: php artisan swagger-lume:generate
-
       - name: Upload Swagger artifact
         uses: actions/upload-artifact@v4
         with:
           name: swagger-docs
-          path: storage/api-docs    # json & yaml output
+          path: storage/api-docs
 
