@@ -39,7 +39,11 @@ jobs:
       - name: Copy env & generate key
         run: |
           cp .env.example .env
-          php -r "file_put_contents('.env', str_replace('APP_KEY=', 'APP_KEY='.`php -r "echo substr(bin2hex(random_bytes(16)),0,32);"`, file_get_contents('.env')));"
+          # ganti APP_KEY=… dengan kunci acak 32 char
+          php -r 'file_put_contents(".env",
+              preg_replace("/^APP_KEY=.*/m",
+              "APP_KEY=" . substr(bin2hex(random_bytes(16)),0,32),
+              file_get_contents(".env")));'
           php artisan migrate --force
 
       - name: Run PHPUnit
