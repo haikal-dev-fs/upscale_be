@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Routing\UrlGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,5 +15,14 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+    }
+
+    public function boot()
+    {
+        // paksa scheme & host dari env
+        if (env('APP_URL')) {
+            app('url')->forceRootUrl(env('APP_URL'));
+            app('url')->forceScheme('https');
+        }
     }
 }
