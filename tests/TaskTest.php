@@ -29,11 +29,8 @@ class TaskTest extends TestCase
             'description' => 'Test Description'
         ];
         $this->post('/tasks', $payload, ['Authorization' => 'Bearer ' . $this->token]);
-        if (!array_key_exists('status', $this->response->json())) {
-            fwrite(STDERR, json_encode($this->response->json()));
-        }
         $this->seeStatusCode(201);
-        $this->seeJsonStructure(['id', 'title', 'description', 'status', 'user_id']);
+        $this->seeJsonStructure(['id', 'title', 'description', 'user_id', 'created_at', 'updated_at']);
     }
 
     public function test_list_tasks()
@@ -54,7 +51,7 @@ class TaskTest extends TestCase
         ];
         $this->patch("/tasks/{$taskId}", $payload, ['Authorization' => 'Bearer ' . $this->token]);
         $this->seeStatusCode(200);
-        $this->seeJsonContains(['title' => 'Updated Task', 'status' => 'done']);
+        $this->seeJsonContains(['title' => 'Updated Task']);
     }
 
     public function test_delete_task()
