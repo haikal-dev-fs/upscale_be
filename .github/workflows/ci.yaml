@@ -21,6 +21,8 @@ jobs:
         run: cp .env.example .env
       - name: Set JWT_SECRET env
         run: echo "JWT_SECRET=testingsecretkey1234567890" >> .env
+      - name: Set API_NINJAS_KEY
+        run: echo "API_NINJAS_KEY=a83NgqLs2zmwSAjc+VOuSg==UHGzJIDmdIc9ts1G" >> .env
       - name: Set up SQLite database
         run: |
           touch database/database.sqlite
