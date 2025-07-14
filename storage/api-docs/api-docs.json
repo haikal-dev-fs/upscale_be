@@ -7,8 +7,12 @@
     },
     "servers": [
         {
-            "url": "http://localhost:3200",
+            "url": "https://upscalebe-production.up.railway.app",
             "description": "Production"
+        },
+        {
+            "url": "http://localhost:3200",
+            "description": "Local development"
         }
     ],
     "paths": {
