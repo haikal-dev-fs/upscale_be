@@ -6,6 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @OA\Tag(
@@ -114,9 +115,12 @@ class TaskController extends Controller
             $task = JWTAuth::user()->tasks()->create($r->only('title','description'));
             DB::commit();
             return response()->json($task,201);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to create task'], 500);
+            return response()->json(['error' => 'Failed to create task', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -128,9 +132,12 @@ class TaskController extends Controller
             $task->update($r->only('title','description','status'));
             DB::commit();
             return $task;
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to update task'], 500);
+            return response()->json(['error' => 'Failed to update task', 'message' => $e->getMessage()], 500);
         }
     }
 

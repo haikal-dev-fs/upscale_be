@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Validation\ValidationException;
 
 
 /**
@@ -37,13 +38,12 @@ class AuthController extends Controller
      */
     public function register(Request $r)
     {
-        $this->validate($r, [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
-        ]);
-
         try {
+            $this->validate($r, [
+                'name' => 'required',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|min:6'
+            ]);
             DB::beginTransaction();
             $user = User::create([
                 'name' => $r->name,
@@ -53,11 +53,12 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($user);
             DB::commit();
             return response()->json(['token' => $token], 201);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Registration failed'], 500);
+            return response()->json(['error' => 'Registration failed', 'message' => $e->getMessage()], 500);
         }
-
     }
      /**
      * @OA\Post(
@@ -81,8 +82,10 @@ class AuthController extends Controller
             if (!$token = JWTAuth::attempt($credentials))
                 return response()->json(['error' => 'invalid_credentials'], 401);
             return compact('token');
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Login failed'], 500);
+            return response()->json(['error' => 'Login failed', 'message' => $e->getMessage()], 500);
         }
     }
 }
