@@ -32,7 +32,12 @@ class QuoteController extends Controller
     public function daily()
     {
         try {
-            $res = Http::withOptions(['verify' => false])->get('https://api.quotable.io/random?tags=inspirational');
+            $apiKey = env('API_NINJAS_KEY');
+            $res = Http::withHeaders([
+                'X-Api-Key' => $apiKey
+            ])->get('https://api.api-ninjas.com/v1/quotes', [
+                'category' => 'inspirational'
+            ]);
             return $res->json();
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch quote'], 500);
