@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-     - name: Copy env & migrate
+      - name: Copy env & migrate
         run: |
           cp .env.example .env
           # generate random APP_KEY
