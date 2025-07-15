@@ -21,6 +21,7 @@ $router->post('/auth/register',  'AuthController@register');
 $router->post('/auth/login',     'AuthController@login');
 
 $router->group(['middleware' => 'auth.jwt'], function () use ($router) {
+    $router->get('/auth/me',      'AuthController@me');
     $router->get('/tasks',        'TaskController@index');      // ?status=pending|done
     $router->post('/tasks',       'TaskController@store');
     $router->patch('/tasks/{id}', 'TaskController@update');

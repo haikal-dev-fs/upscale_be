@@ -88,4 +88,23 @@ class AuthController extends Controller
             return response()->json(['error' => 'Login failed', 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *   path="/auth/me",
+     *   tags={"Auth"},
+     *   summary="Get current authenticated user",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\Response(response=200, description="User credentials")
+     * )
+     */
+    public function me(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json($user);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Could not fetch user', 'message' => $e->getMessage()], 401);
+        }
+    }
 }
